@@ -1,0 +1,162 @@
+<!DOCTYPE hmtl>
+<html>
+    <head>
+        <title>Ping pong game</title>
+    </head>
+    <canvas id="myCanvas" style="border:1px solid black">
+    </canvas>
+    <body>
+        <script>
+            var c=document.getElementById("myCanvas");
+            var ctx=c.getContext("2d");
+            c.width=window.innerWidth;
+            c.height=window.innerHeight;
+            ctx.beginPath();
+            ctx.arc(95,50,40,0,2*Math.PI);
+            ctx.stroke();
+
+            const ball = {
+                x : canvas.width/2,
+                y : canvas.height/2,
+                radius : 10,
+                velocityX : 5,
+                velocityY : 5,
+                speed : 7,
+                color : "WHITE"
+            }
+
+            const user = {
+                x : 0, // left side of canvas
+                y : (canvas.height - 100)/2, // -100 the height of paddle
+                width : 10,
+                height : 100,
+                score : 0,
+                color : "WHITE"
+            }
+
+            // COM Paddle
+            const com = {
+                x : canvas.width - 10, // - width of paddle
+                y : (canvas.height - 100)/2, // -100 the height of paddle
+                width : 10,
+                height : 100,
+                score : 0,
+                color : "WHITE"
+            }
+
+            canvas.addEventListener("mousemove", getMousePos);
+
+            function getMousePos(evt){
+                let rect = canvas.getBoundingClientRect();
+    
+                user.y = evt.clientY - rect.top - user.height/2;
+            }
+
+            function resetBall(){
+                ball.x = canvas.width/2;
+                ball.y = canvas.height/2;
+                ball.velocityX = -ball.velocityX;
+                ball.speed = 7;
+            }
+
+            function drawText(text,x,y){
+                ctx.fillStyle = "#FFF";
+                ctx.font = "75px fantasy";
+                ctx.fillText(text, x, y);
+            }
+
+            function collision(b,p){
+                p.top = p.y;
+                p.bottom = p.y + p.height;
+                p.left = p.x;
+                p.right = p.x + p.width;
+    
+                b.top = b.y - b.radius;
+                b.bottom = b.y + b.radius;
+                b.left = b.x - b.radius;
+                b.right = b.x + b.radius;
+    
+                return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
+            }
+
+            function update() {
+                if (ball.x - ball.radius < 0) {
+                    com.score++;
+                    comScore.play();
+                    resetBall();
+                }
+
+                else if( ball.x + ball.radius > canvas.width){
+                    user.score++;
+                    userScore.play();
+                    resetBall();
+                }
+            }
+
+            ball.x += ball.velocityX;
+            ball.y += ball.velocityY;
+
+            com.y += ((ball.y - (com.y + com.height/2)))*0.1;
+    
+            if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
+                ball.velocityY = -ball.velocityY;
+                wall.play();
+            }
+
+            if(collision(ball,player)){
+                hit.play();
+        
+                let collidePoint = (ball.y - (player.y + player.height/2));
+        
+                collidePoint = collidePoint / (player.height/2);
+        
+        
+                let angleRad = (Math.PI/4) * collidePoint;
+        
+        
+                let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
+                ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+                ball.velocityY = ball.speed * Math.sin(angleRad);
+        
+        
+                ball.speed += 0.1;
+            }
+
+            // render function, the function that does al the drawing
+            function render(){
+    
+            // clear the canvas
+            drawRect(0, 0, canvas.width, canvas.height, "#000");
+    
+            // draw the user score to the left
+            drawText(user.score,canvas.width/4,canvas.height/5);
+    
+            // draw the COM score to the right
+            drawText(com.score,3*canvas.width/4,canvas.height/5);
+    
+            // draw the user's paddle
+            drawRect(user.x, user.y, user.width, user.height, user.color);
+    
+            // draw the COM's paddle
+            drawRect(com.x, com.y, com.width, com.height, com.color);
+    
+            // draw the ball
+            drawArc(ball.x, ball.y, ball.radius, ball.color);
+        }
+            function game(){
+                update();
+                render();
+            }
+            // number of frames per second
+            let framePerSecond = 50;
+
+            //call the game function 50 times every 1 Sec
+            let loop = setInterval(game,1000/framePerSecond);
+
+
+
+
+            
+        </script>
+    </body>
+</html>
